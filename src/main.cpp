@@ -21,6 +21,11 @@ TFT_eSPI tft = TFT_eSPI();
 Button2 btnUp(BUTTON_1);
 Button2 btnDown(BUTTON_2);
 
+#define DISPLAY_OFFSET_X 40
+#define DISPLAY_OFFSET_Y 53
+#define DISPLAT_WIDTH 240
+#define DISPLAY_HEIGHT 132
+
 int setPoint = 195;
 const int LENGTH = 130;
 const int DEBOUNCE = 10;
@@ -68,10 +73,12 @@ void drawValues() {
     max = min + 5;
   }
   float scale = max - min;
-  tft.fillRect(40, 145, 240, 42, TFT_BLACK);
-  int y = 185;
-  float w = 240.0 / count;
-  float h = 40.0 / scale;
+  int height = 45;
+  int y = DISPLAY_HEIGHT + DISPLAY_OFFSET_Y - 2;
+  tft.fillRect(DISPLAY_OFFSET_X + 1, y - height, DISPLAT_WIDTH - 2, height + 1,
+               TFT_BLACK);
+  float w = float(DISPLAT_WIDTH - 2) / count;
+  float h = float(height) / scale;
   for (int i = 1; i < count; i++) {
     int color = TFT_ORANGE;
     if (lastValues[i] < 195) {
@@ -79,8 +86,9 @@ void drawValues() {
     }
     int valueA = (lastValues[i] - min) * h;
     int valueB = (lastValues[i - 1] - min) * h;
-    int x = 40 + (i * w);
-    tft.drawLine(x - w, y - valueB, x, y - valueA, color);
+    int x = DISPLAY_OFFSET_X + 1 + (i * w);
+    int x2 = x - w < DISPLAY_OFFSET_X + 1 ? DISPLAY_OFFSET_X + 1 : x - w;
+    tft.drawLine(x2, y - valueB, x, y - valueA, color);
   }
 }
 
@@ -147,14 +155,18 @@ void InitDisplay() {
   tft.init();
   tft.setRotation(3);
   tft.fillScreen(TFT_BLACK);
+  tft.drawRect(DISPLAY_OFFSET_X, DISPLAY_OFFSET_Y, DISPLAT_WIDTH,
+               DISPLAY_HEIGHT, TFT_WHITE);
+  delay(1000);
 }
 
 // w = 280
 // h = 188
 
 void tftValue(int value) {
-  int x = 100;
-  int y = 95;
+
+  int x = DISPLAY_OFFSET_X + (DISPLAT_WIDTH - 162) / 2;
+  int y = DISPLAY_OFFSET_Y + 30;
   tft.setTextColor(TFT_WHITE);
   tft.fillRect(x, y, 162, 49, TFT_BLACK);
   tft.setCursor(x, y);
@@ -164,8 +176,8 @@ void tftValue(int value) {
 }
 
 void tftSetpoint(int value) {
-  int x = 100;
-  int y = 75;
+  int x = DISPLAY_OFFSET_X + (DISPLAT_WIDTH - 162) / 2;
+  int y = DISPLAY_OFFSET_Y + 10;
   tft.setTextColor(TFT_WHITE);
   tft.fillRect(x, y, 162, 15, TFT_BLACK);
   tft.setTextSize(2);
